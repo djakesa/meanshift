@@ -54,9 +54,15 @@ int main(int argc, char** argv)
 
     PRINT_MAT_INFO(m);
 
-
     // définition seuil spatial
     float hs = 15; 
+    // zero padding pour pas couper l'image 
+    Mat padding_m;
+    copyMakeBorder(m, padding_m, 
+        hs, hs, // Haut et bas
+        hs, hs, // Gauche et droite
+        cv::BORDER_CONSTANT, 
+        cv::Scalar(0, 0, 0)); 
     // définition seuil colorimétrique
     float hc = 15; 
     // définition de epsilon
@@ -76,9 +82,9 @@ int main(int argc, char** argv)
 
     clock_t start = clock();
 
-    for (int i = hs; i < m.rows - hs; ++i)
+    for (int i = 0; i < m.rows ; ++i)
     {
-        for (int j = hs; j < m.cols - hs; ++j)
+        for (int j = 0 ; j < m.cols ; ++j)
         {
             // initialise tout de nouveau pour une nouvelle région 
             M = Vec3d(0, 0, 0);
@@ -154,23 +160,24 @@ int main(int argc, char** argv)
 
                     centres_distincts.push_back(nouveauPoint);
             }
-            cout << " nombre de clusters différents : " << centres_distincts.size() -1 << endl;
 
             // i et j coordonnées du point de base 
             // Met à jour uniquement le pixel courant dans l'image segmentée
             msimage.at<Vec3b>(i, j)[0] = centre[0];
             msimage.at<Vec3b>(i, j)[1] = centre[1];
             msimage.at<Vec3b>(i, j)[2] = centre[2];
+
         }
     } 
+    cout << " nombre de clusters différents : " << centres_distincts.size() -1 << endl;
 
     clock_t end = clock();
 
     Vec3d somme ; 
 
-    for (int i = hs; i < m.rows - hs; ++i)
+    for (int i = 0; i < m.rows ; ++i)
     {
-        for (int j = hs; j < m.cols - hs; ++j)
+        for (int j = 0; j < m.cols ; ++j)
         {
             somme [0] = msimage.at<Vec3b>(i, j)[0];
             somme [1] =msimage.at<Vec3b>(i, j)[1];
@@ -184,9 +191,9 @@ int main(int argc, char** argv)
 
 
     Mat image_test = Mat::zeros(msimage.size(), msimage.type());
-    for (int i = hs; i < m.rows - hs; ++i)
+    for (int i = 0; i < m.rows; ++i)
     {
-        for (int j = hs; j < m.cols - hs; ++j)
+        for (int j = 0; j < m.cols ; ++j)
         {
 
             if (norm(somme) > norm (msimage.at<Vec3b>(i, j)))
